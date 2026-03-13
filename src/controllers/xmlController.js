@@ -9,17 +9,17 @@ export const criar = async (req, res) => {
 
         const { nome, estado, preco } = xmlToObj(req.body);
 
-        if (!nome) return sendXml(res, 400, { error: ' O campo "nome" é obrigatório!' });
+        if (!nome) return sendXml(res, 400, { error: 'O campo "nome" é obrigatório!' });
         if (preco === undefined || preco === null)
-            return sendXml (res,400, {error: 'O campo "preco" é obrigatório'})
+            return sendXml(res, 400, { error: 'O campo "preco" é obrigatório!' });
 
         const exemplo = new ExemploModel({ nome, estado, preco: parseFloat(preco) });
         const data = await exemplo.criar();
 
-        res.status(201).json({ message: 'Registro criado com sucesso!', data });
+        sendXml(res, 201, { message: 'Registro criado com sucesso!', data });
     } catch (error) {
         console.error('Erro ao criar:', error);
-        res.status(500).json({ error: 'Erro interno ao salvar o registro.' });
+        sendXml(res, 500, { error: 'Erro interno ao salvar o registro.' });
     }
 };
 

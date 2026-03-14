@@ -28,13 +28,13 @@ export const buscarTodos = async (req, res) => {
         const registros = await ExemploModel.buscarTodos(req.query);
 
         if (!registros || registros.length === 0) {
-            return res.status(200).json({ message: 'Nenhum registro encontrado.' });
+            return sendXml(res, 400,{ message: 'Nenhum registro encontrado.' });
         }
 
-        res.json(registros);
+         return sendXml(registros);
     } catch (error) {
         console.error('Erro ao buscar:', error);
-        res.status(500).json({ error: 'Erro ao buscar registros.' });
+         return sendXml(res, 500,{ error: 'Erro ao buscar registros.' });
     }
 };
 
@@ -43,19 +43,19 @@ export const buscarPorId = async (req, res) => {
         const { id } = req.params;
 
         if (isNaN(id)) {
-            return res.status(400).json({ error: 'O ID enviado não é um número válido.' });
+             return sendXml(res, 400,{ error: 'O ID enviado não é um número válido.' });
         }
 
         const exemplo = await ExemploModel.buscarPorId(parseInt(id));
 
         if (!exemplo) {
-            return res.status(404).json({ error: 'Registro não encontrado.' });
+            return sendXml(res, 400,{ error: 'Registro não encontrado.' });
         }
 
-        res.json({ data: exemplo });
+        return sendXml({ data: exemplo });
     } catch (error) {
         console.error('Erro ao buscar:', error);
-        res.status(500).json({ error: 'Erro ao buscar registro.' });
+         return sendXml(res, 500,{ error: 'Erro ao buscar registro.' });
     }
 };
 
@@ -63,28 +63,28 @@ export const atualizar = async (req, res) => {
     try {
         const { id } = req.params;
 
-        if (isNaN(id)) return res.status(400).json({ error: 'ID inválido.' });
+        if (isNaN(id))  return sendXml(res, 400,{ error: 'ID inválido.' });
 
         if (!req.body) {
-            return res.status(400).json({ error: 'Corpo da requisição vazio. Envie os dados!' });
+             return sendXml(res, 400,{ error: 'Corpo da requisição vazio. Envie os dados!' });
         }
 
         const exemplo = await ExemploModel.buscarPorId(parseInt(id));
 
         if (!exemplo) {
-            return res.status(404).json({ error: 'Registro não encontrado para atualizar.' });
+             return sendXml(res, 404,{ error: 'Registro não encontrado para atualizar.' });
         }
 
-        if (req.body.nome !== undefined) exemplo.nome = req.body.nome;
-        if (req.body.estado !== undefined) exemplo.estado = req.body.estado;
-        if (req.body.preco !== undefined) exemplo.preco = parseFloat(req.body.preco);
+        if (xmlToObj(req.body).nome !== undefined) exemplo.nome = xmlToObj(req.body).nome;
+        if (xmlToObj(req.body).estado !== undefined) exemplo.estado = xmlToObj(req.body).estado;
+        if (xmlToObj(req.body).preco !== undefined) exemplo.preco = parseFloat(xmlToObj(req.body).preco);
 
         const data = await exemplo.atualizar();
 
-        res.json({ message: `O registro "${data.nome}" foi atualizado com sucesso!`, data });
+         return sendXml(res, 200,{ message: `O registro "${data.nome}" foi atualizado com sucesso!`, data });
     } catch (error) {
         console.error('Erro ao atualizar:', error);
-        res.status(500).json({ error: 'Erro ao atualizar registro.' });
+         return sendXml(res, 500,{ error: 'Erro ao atualizar registro.' });
     }
 };
 
@@ -92,22 +92,22 @@ export const deletar = async (req, res) => {
     try {
         const { id } = req.params;
 
-        if (isNaN(id)) return res.status(400).json({ error: 'ID inválido.' });
+        if (isNaN(id))  return sendXml(res, 400,{ error: 'ID inválido.' });
 
         const exemplo = await ExemploModel.buscarPorId(parseInt(id));
 
         if (!exemplo) {
-            return res.status(404).json({ error: 'Registro não encontrado para deletar.' });
+             return sendXml(res, 404,{ error: 'Registro não encontrado para deletar.' });
         }
 
         await exemplo.deletar();
 
-        res.json({
+         return sendXml(res, 200,{
             message: `O registro "${exemplo.nome}" foi deletado com sucesso!`,
             deletado: exemplo,
         });
     } catch (error) {
         console.error('Erro ao deletar:', error);
-        res.status(500).json({ error: 'Erro ao deletar registro.' });
+         return sendXml(res, 500,{ error: 'Erro ao deletar registro.' });
     }
 };
